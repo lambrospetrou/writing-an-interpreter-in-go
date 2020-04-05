@@ -6,10 +6,20 @@ var Caml_format = require("bs-platform/lib/js/caml_format.js");
 
 function lookupIdentifier(str) {
   switch (str) {
+    case "else" :
+        return /* ELSE */20;
+    case "false" :
+        return /* FALSE */18;
     case "fn" :
-        return /* FUNCTION */9;
+        return /* FUNCTION */22;
+    case "if" :
+        return /* IF */19;
     case "let" :
-        return /* LET */10;
+        return /* LET */23;
+    case "return" :
+        return /* RETURN */21;
+    case "true" :
+        return /* TRUE */17;
     default:
       return /* IDENT */Block.__(1, [str]);
   }
@@ -32,6 +42,14 @@ function isDigit(ch) {
     return ch <= "9";
   } else {
     return false;
+  }
+}
+
+function peekChar(l) {
+  if (l.readPosition < l.input.length) {
+    return l.input.charAt(l.readPosition);
+  } else {
+    return "";
   }
 }
 
@@ -88,15 +106,30 @@ function nextToken(l) {
           readChar(l$1)
         ];
         break;
+    case "!" :
+        match$1 = peekChar(l$1) === "=" ? /* tuple */[
+            /* NOT_EQ */10,
+            readChar(readChar(l$1))
+          ] : /* tuple */[
+            /* BANG */4,
+            readChar(l$1)
+          ];
+        break;
     case "(" :
         match$1 = /* tuple */[
-          /* LPAREN */5,
+          /* LPAREN */13,
           readChar(l$1)
         ];
         break;
     case ")" :
         match$1 = /* tuple */[
-          /* RPAREN */6,
+          /* RPAREN */14,
+          readChar(l$1)
+        ];
+        break;
+    case "*" :
+        match$1 = /* tuple */[
+          /* ASTERISK */5,
           readChar(l$1)
         ];
         break;
@@ -108,31 +141,58 @@ function nextToken(l) {
         break;
     case "," :
         match$1 = /* tuple */[
-          /* COMMA */3,
+          /* COMMA */11,
+          readChar(l$1)
+        ];
+        break;
+    case "-" :
+        match$1 = /* tuple */[
+          /* MINUS */3,
+          readChar(l$1)
+        ];
+        break;
+    case "/" :
+        match$1 = /* tuple */[
+          /* SLASH */6,
           readChar(l$1)
         ];
         break;
     case ";" :
         match$1 = /* tuple */[
-          /* SEMICOLON */4,
+          /* SEMICOLON */12,
+          readChar(l$1)
+        ];
+        break;
+    case "<" :
+        match$1 = /* tuple */[
+          /* LT */7,
           readChar(l$1)
         ];
         break;
     case "=" :
+        match$1 = peekChar(l$1) === "=" ? /* tuple */[
+            /* EQ */9,
+            readChar(readChar(l$1))
+          ] : /* tuple */[
+            /* ASSIGN */1,
+            readChar(l$1)
+          ];
+        break;
+    case ">" :
         match$1 = /* tuple */[
-          /* ASSIGN */1,
+          /* GT */8,
           readChar(l$1)
         ];
         break;
     case "{" :
         match$1 = /* tuple */[
-          /* LBRACE */7,
+          /* LBRACE */15,
           readChar(l$1)
         ];
         break;
     case "}" :
         match$1 = /* tuple */[
-          /* RBRACE */8,
+          /* RBRACE */16,
           readChar(l$1)
         ];
         break;
@@ -162,6 +222,7 @@ function make(input) {
 var Lexer = {
   isLetter: isLetter,
   isDigit: isDigit,
+  peekChar: peekChar,
   readChar: readChar,
   readIdentifier: readIdentifier,
   readNumber: readNumber,

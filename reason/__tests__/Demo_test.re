@@ -35,7 +35,7 @@ describe("Lexer", () => {
     };
 
     test("simple", () => {
-      let input = "=+(){},;|";
+      let input = "=+(){},;|!-/*<>";
       expect(gatherTokens(input))
       |> toEqual([|
         Token.ASSIGN,
@@ -46,7 +46,13 @@ describe("Lexer", () => {
         Token.RBRACE,
         Token.COMMA,
         Token.SEMICOLON,
-        Token.ILLEGAL("|")
+        Token.ILLEGAL("|"),
+        Token.BANG,
+        Token.MINUS,
+        Token.SLASH,
+        Token.ASTERISK,
+        Token.LT,
+        Token.GT
       |])
     });
 
@@ -59,7 +65,15 @@ describe("Lexer", () => {
           x + y;
         };
 
-        let result = add(five, ten);";
+        if (add(five, ten) > 5) {
+          return true;
+        } else {
+          return false;
+        }
+
+        10 == 10;
+        9 != 10;
+        ";
 
       expect(gatherTokens(input))
       |> toEqual([|
@@ -89,16 +103,36 @@ describe("Lexer", () => {
         Token.SEMICOLON,
         Token.RBRACE,
         Token.SEMICOLON,
-        Token.LET,
-        Token.IDENT("result"),
-        Token.ASSIGN,
+        Token.IF,
+        Token.LPAREN,
         Token.IDENT("add"),
         Token.LPAREN,
         Token.IDENT("five"),
         Token.COMMA,
         Token.IDENT("ten"),
         Token.RPAREN,
+        Token.GT,
+        Token.INTEGER(5),
+        Token.RPAREN,
+        Token.LBRACE,
+        Token.RETURN,
+        Token.TRUE,
         Token.SEMICOLON,
+        Token.RBRACE,
+        Token.ELSE,
+        Token.LBRACE,
+        Token.RETURN,
+        Token.FALSE,
+        Token.SEMICOLON,
+        Token.RBRACE,
+        Token.INTEGER(10),
+        Token.EQ,
+        Token.INTEGER(10),
+        Token.SEMICOLON,
+        Token.INTEGER(9),
+        Token.NOT_EQ,
+        Token.INTEGER(10),
+        Token.SEMICOLON
       |])
     });
 

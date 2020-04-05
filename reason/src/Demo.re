@@ -8,6 +8,14 @@ module Token {
     // Operators
     | ASSIGN
     | PLUS
+    | MINUS
+    | BANG
+    | ASTERISK
+    | SLASH
+    | LT
+    | GT
+    | EQ
+    | NOT_EQ
     // Delimeters
     | COMMA
     | SEMICOLON
@@ -16,6 +24,11 @@ module Token {
     | LBRACE
     | RBRACE
     // Keywords
+    | TRUE
+    | FALSE
+    | IF
+    | ELSE
+    | RETURN
     | FUNCTION
     | LET;
 
@@ -23,6 +36,11 @@ module Token {
     switch(str) {
       | "fn" => FUNCTION
       | "let" => LET
+      | "true" => TRUE
+      | "false" => FALSE
+      | "if" => IF
+      | "else" => ELSE
+      | "return" => RETURN
       | _ => IDENT(str)
     };
   }
@@ -42,6 +60,12 @@ module Lexer {
 
   let isLetter = (ch) => (ch >= "A" && ch <= "Z") || (ch >= "a" && ch <= "z") || ch == "_";
   let isDigit =  (ch) => (ch >= "0" && ch <= "9");
+
+  let peekChar = (l: lexer): string => {
+    l.readPosition < Js.String.length(l.input) 
+      ? Js.String.charAt(l.readPosition, l.input)
+      : "";
+  }
 
   let readChar = (l: lexer): lexer => {
     let ch = l.readPosition < Js.String.length(l.input) 
@@ -94,8 +118,26 @@ module Lexer {
 
     // TODO Do better than this duplication :(
     let (token, newLexer) = switch (l.ch) {
-      | "=" => (Token.ASSIGN, readChar(l))
+      | "=" => {
+        if (peekChar(l) == "=") {
+          (Token.EQ, readChar(readChar(l)))
+        } else {
+          (Token.ASSIGN, readChar(l))
+        }
+      }
       | "+" => (Token.PLUS, readChar(l))
+      | "-" => (Token.MINUS, readChar(l))
+      | "!" => {
+        if (peekChar(l) == "=") {
+          (Token.NOT_EQ, readChar(readChar(l)))
+        } else {
+          (Token.BANG, readChar(l))
+        }
+      }
+      | "*" => (Token.ASTERISK, readChar(l))
+      | "/" => (Token.SLASH, readChar(l))
+      | "<" => (Token.LT, readChar(l))
+      | ">" => (Token.GT, readChar(l))
       | ";" => (Token.SEMICOLON, readChar(l))
       | "," => (Token.COMMA, readChar(l))
       | "(" => (Token.LPAREN, readChar(l))
